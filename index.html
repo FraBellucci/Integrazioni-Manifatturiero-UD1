@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Safety Barrier Challenge - UD1 Professional</title>
+    <style>
+        :root { --neon-yellow: #f1c40f; --neon-green: #27ae60; --danger-red: #e74c3c; --nav-bg: #222; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a1a1a; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        
+        /* Navigation Buttons */
+        .nav-bar { width: 800px; display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .btn-nav { background: var(--nav-bg); color: #fff; border: 1px solid #555; padding: 8px 15px; cursor: pointer; border-radius: 4px; font-size: 13px; transition: 0.3s; }
+        .btn-nav:hover { background: #444; }
+        .btn-close { border-color: var(--danger-red); color: var(--danger-red); }
+
+        #game-container { width: 800px; background: #2c3e50; border: 4px solid #34495e; padding: 25px; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        
+        .scenario-box { background: #34495e; padding: 15px; margin-bottom: 20px; border-left: 5px solid #e67e22; border-radius: 4px; }
+        .scenario-box strong { color: #e67e22; display: block; margin-bottom: 5px; }
+
+        .barrier-slots { display: flex; justify-content: space-around; margin: 30px 0; min-height: 120px; gap: 10px; }
+        .barrier { 
+            width: 150px; height: 100px; background: #ecf0f1; color: #2c3e50; border-radius: 8px; 
+            display: flex; align-items: center; justify-content: center; text-align: center; 
+            font-weight: bold; font-size: 13px; padding: 10px; cursor: pointer; transition: 0.3s; 
+            border: 3px solid transparent; box-sizing: border-box;
+        }
+        .barrier:hover { transform: translateY(-5px); background: #fff; }
+        .barrier.selected { border: 3px solid var(--neon-yellow); background: var(--neon-yellow); box-shadow: 0 0 15px rgba(241, 196, 15, 0.4); }
+
+        #status-bar { height: 15px; width: 100%; background: #444; border-radius: 10px; margin-top: 25px; overflow: hidden; border: 1px solid #555; }
+        #risk-level { height: 100%; width: 0%; background: var(--danger-red); transition: 0.8s ease-in-out; }
+        
+        .feedback-area { min-height: 60px; margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 5px; border: 1px thin #444; }
+        #feedback-text { font-style: italic; color: #bdc3c7; margin: 0; }
+
+        .btn-action { background: var(--neon-green); color: white; border: none; padding: 15px 40px; font-size: 18px; font-weight: bold; border-radius: 5px; cursor: pointer; margin-top: 10px; width: 100%; transition: 0.3s; }
+        .btn-action:hover { background: #2ecc71; transform: scale(1.01); }
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <button class="btn-nav" onclick="location.reload()">🔁 Ricomincia</button>
+        <button class="btn-nav btn-close" onclick="window.close()">← Torna al corso</button>
+    </div>
+
+    <div id="game-container">
+        <div class="scenario-box">
+            <strong>ANALISI DI INCIDENTE (UD1):</strong> 
+            È stata rilevata una perdita di contenimento di Idrogeno Solforato ($H_2S$) da una flangia corrosa in area desolforazione. 
+            Il gas è letale e invisibile. Seleziona le 3 barriere (Misure di Prevenzione) per mitigare il rischio.
+        </div>
+
+        <div class="barrier-slots" id="options">
+            <div class="barrier" onclick="toggleBarrier(this, 1)">DPI:<br>Maschera con filtro</div>
+            <div class="barrier" onclick="toggleBarrier(this, 4)">TECNICA:<br>Sistema SIS/ESD</div>
+            <div class="barrier" onclick="toggleBarrier(this, 2)">PROCEDURA:<br>Permesso di Lavoro</div>
+            <div class="barrier" onclick="toggleBarrier(this, 3)">MANUTENZIONE:<br>Ispezione RBI</div>
+            <div class="barrier" onclick="toggleBarrier(this, 0)">INFO:<br>Segnaletica Pericolo</div>
+        </div>
+
+        <button class="btn-action" onclick="simulateAccident()">AVVIA ANALISI DELLE BARRIERE</button>
+
+        <div id="status-bar">
+            <div id="risk-level"></div>
+        </div>
+
+        <div class="feedback-area">
+            <p id="feedback-text">Seleziona esattamente 3 barriere e clicca su Avvia.</p>
+        </div>
+    </div>
+
+    <script>
+        let selectedValues = [];
+
+        function toggleBarrier(el, val) {
+            const index = selectedValues.indexOf(val);
+            if (index > -1) {
+                selectedValues.splice(index, 1);
+                el.classList.remove('selected');
+            } else if (selectedValues.length < 3) {
+                selectedValues.push(val);
+                el.classList.add('selected');
+            }
+        }
+
+        function simulateAccident() {
+            if (selectedValues.length !== 3) {
+                alert("Per un'analisi corretta secondo il modello di Reason, seleziona 3 barriere.");
+                return;
+            }
+
+            const score = selectedValues.reduce((a, b) => a + b, 0);
+            const riskBar = document.getElementById('risk-level');
+            const feedback = document.getElementById('feedback-text');
+
+            // Logica di valutazione professionale (Somma dei valori tecnici)
+            // 4 (SIS) + 3 (RBI) + 2 (Proc) = 9 (Ottimo)
+            // 1 (DPI) + 0 (Info) + 2 (Proc) = 3 (Pessimo)
+
+            if (score >= 8) {
+                riskBar.style.width = "5%"; 
+                riskBar.style.background = "#27ae60";
+                feedback.innerHTML = "<strong>ESITO POSITIVO:</strong> Hai privilegiato barriere tecniche e predittive (SIS e RBI). Il rischio residuo è minimo e conforme agli standard Seveso.";
+            } else if (score >= 5) {
+                riskBar.style.width = "45%"; 
+                riskBar.style.background = "#f39c12";
+                feedback.innerHTML = "<strong>ATTENZIONE:</strong> Ti sei affidato troppo a misure amministrative/DPI. In caso di errore umano, l'incidente non verrà evitato alla fonte.";
+            } else {
+                riskBar.style.width = "100%"; 
+                riskBar.style.background = "#c0392b";
+                feedback.innerHTML = "<strong>INCIDENTE CATASTROFICO:</strong> DPI e cartelli non fermano una perdita di processo. Responsabilità del DL-RSPP per omessa prevenzione tecnica.";
+            }
+        }
+    </script>
+</body>
+</html>
